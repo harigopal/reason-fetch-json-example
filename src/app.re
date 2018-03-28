@@ -2,6 +2,7 @@
 
 let str = ReasonReact.stringToElement;
 
+/* let ustr = ReasonReact.stringToSta; */
 let component = ReasonReact.statelessComponent("App");
 
 let someJson = {|{
@@ -71,7 +72,8 @@ let handleClick = _event => {
   |> Js.Promise.then_(usersList => {
        Encode.users(usersList) |> Js.Json.stringify |> Js.log;
        Js.Promise.resolve();
-     });
+     })
+  |> ignore;
   Js.log("All set up!");
 };
 
@@ -83,34 +85,58 @@ let make = _children => {
         <h2> (str("Let's play with JSON in ReasonML!")) </h2>
       </div>
       <div className="app__content">
-        <p> (str("Let's start with some JSON:")) </p>
-        <pre> (str(someJson)) </pre>
+        <h3> (str("Unsafe parsing")) </h3>
         <p>
-          (str("We'll start easy by writing an unsafe call to JSON.parse"))
+          (str("Let's start with some JSON (string) stored in a variable:"))
         </p>
-        <p>
+        <pre>
           (
             str(
-              "But what if you're not holding a string. What can you do if ReasonML hands you a <code>Js.Json.t</code> type object? In fact, this is exactly what happens if you use <code>fetch</code>, and parse the response as JSON. The promise will resolve in a <code>Js.Json.t</code> which you can't use until you decode it. In such situations, your best option is to play it safe, and use <code>bs-json</code> library.",
+              {string|let someJson = {|
+{
+  "hello": "world"
+}
+|};
+          |string},
             )
           )
-        </p>
-        <p>
+        </pre>
+        <p
+          dangerouslySetInnerHTML={
+            "__html": "We'll start easy by writing an unsafe call to <code>JSON.parse</code>.",
+          }
+        />
+        <pre>
           (
             str(
-              "We'll use a library called bs-json to convert the above string into a Bucklescript Object (as \"Record\").",
+              {|type someJsonType = {. "hello": string};
+
+[@bs.scope "JSON"] [@bs.val]
+external unsafeParse : string => someJsonType = "parse";
+
+let parsedRecord = someJson |> unsafeParse;|},
             )
           )
-        </p>
-        <p>
-          (
-            str(
-              "Before we do so, we must create a type that represents this data. We'll need it for the conversion.",
-            )
-          )
-        </p>
-        (str(someObject##hello))
-        <button onClick=handleClick> (str("Load Users from API")) </button>
+        </pre>
+        <p
+          dangerouslySetInnerHTML={
+            "__html": "Here, you're telling Reason to <em>trust</em> you that the return from <code>JSON.parse</code> is going to be of the specified type. It works, but it's not safe for <em>most</em> real-world use cases.",
+          }
+        />
+        <p
+          dangerouslySetInnerHTML={
+            "__html": "But what if you're not holding a string. What can you do if ReasonML hands you a <code>Js.Json.t</code> type object? In fact, this is exactly what happens if you use <code>fetch</code>, and parse the response as JSON. The promise will resolve in a <code>Js.Json.t</code> which you can't use until you decode it. In such situations, your best option is to play it safe, and use <code>bs-json</code> library.",
+          }
+        />
+        <h3> (str("Fetch and Parse JSON response")) </h3>
+        <p
+          dangerouslySetInnerHTML={
+            "__html": "Let's <em>fetch</em> some JSON with <code>bs-fetch</code> and parse and decode it with <code>bs-json</code>!",
+          }
+        />
+        <button className="app__load-button" onClick=handleClick>
+          (str("Click here to load users from the API"))
+        </button>
       </div>
     </div>,
 };

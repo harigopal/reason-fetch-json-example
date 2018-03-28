@@ -13,3 +13,16 @@ pre {
   font-size: large;
   padding: 2rem;
 }
+
+.app__load-button {
+  background-color: #ddd;
+  border: 2px solid #bbb;
+  border-radius: 0.5rem;
+  padding: 1rem;
+  color: black;
+  cursor: pointer;
+}
+
+.app__load-button:hover {
+  background-color: #eee;
+}
