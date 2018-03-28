@@ -2,29 +2,25 @@
 
 let str = ReasonReact.stringToElement;
 
-/* let ustr = ReasonReact.stringToSta; */
 let component = ReasonReact.statelessComponent("App");
 
 let someJson = {|{
   "hello": "world"
 }|};
 
+/* ************** */
+/* Unsafe parsing */
+/* ************** */
 type someJsonType = {. "hello": string};
 
 [@bs.scope "JSON"] [@bs.val]
 external parseSomeJson : string => someJsonType = "parse";
 
-/* type someJsonType = {. hello: string}; */
 let someObject = someJson |> parseSomeJson;
 
-module Option = {
-  let unwrapUnsafely = data =>
-    switch (data) {
-    | Some(v) => v
-    | None => raise(Invalid_argument("unwrapUnsafely called on None"))
-    };
-};
-
+/* **************************** */
+/* Decode & Encode with bs-json */
+/* **************************** */
 type user = {
   id: int,
   name: string,
